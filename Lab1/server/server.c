@@ -30,20 +30,18 @@ int main()
         exit(1);
     }
     int size = sizeof(addr);
-    getsockname(sockfd, (struct sockaddr *)&addr, &size);
-    printf("Port - %d\n", ntohs(addr.sin_port));
+    //getsockname(sockfd, (struct sockaddr *)&addr, &size);
 
     for (int i = 0; i < 8; i++)
     {
         int len = sizeof(addr_client);
         bytes_r = recvfrom(sockfd, &in, sizeof(in), 0, (struct sockaddr *)&addr_client, &len);
 
-        printf("%d\n", i);
-        printf("%s\n", inet_ntoa(addr_client.sin_addr));
+        printf("IP: %s, port: %d, ", inet_ntoa(addr_client.sin_addr), ntohs(addr.sin_port));
+        printf("massage: %d\n", in);
 
         out = in * in;
         sendto(sockfd, &out, sizeof(out), 0, (struct sockaddr *)&addr_client, sizeof(addr_client));
-        printf("n - %d\n", i);
     }
     return 0;
 }

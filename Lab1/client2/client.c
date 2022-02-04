@@ -22,8 +22,6 @@ int main()
     addr.sin_port = htons(1239);
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    printf("Port - %d\n", ntohs(addr.sin_port));
-
     for (int i = 0; i < 4; i++)
     {
         sleep(i);
