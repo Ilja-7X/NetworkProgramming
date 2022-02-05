@@ -27,8 +27,8 @@ int main()
         sleep(i);
         out = i;
         sendto(sockfd, &out, sizeof(out), 0, (struct sockaddr *)&addr, sizeof(addr));
-        int len = sizeof(addr);
-        recvfrom(sockfd, &in, sizeof(in), 0, (struct sockaddr *)&addr, &len);
+
+        recvfrom(sockfd, &in, sizeof(in), 0, NULL, NULL);
 
         printf("%d\n", in);
     }

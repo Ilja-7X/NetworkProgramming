@@ -43,5 +43,8 @@ int main()
         out = in * in;
         sendto(sockfd, &out, sizeof(out), 0, (struct sockaddr *)&addr_client, sizeof(addr_client));
     }
+
+    close(sockfd);
+
     return 0;
 }
