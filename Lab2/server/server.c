@@ -8,19 +8,16 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
-void handler(int sig)
+void reaper(int sig)
 {
-    pid_t id;
-    while ((id = waitpid(-1, NULL, WNOHANG)) > 0)
+    int status;
+    while (wait3(&status, WNOHANG, (struct rusage *)0) >= 0)
     {
-        printf("wait child success: %d\n", getpid());
     }
-}
-
-void func(int signum)
-{
-    wait(NULL);
 }
 
 int main()
@@ -29,7 +26,6 @@ int main()
     struct sockaddr_in addr, addr_client;
     int bytes_r;
     int in, out;
-    //printf("Perent:%u, I is %u \n", getppid(), getpid());
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -48,9 +44,9 @@ int main()
         exit(2);
     }
 
-    //printf("Perent:%u, I is %u\n", getppid(), getpid());
-
     listen(sockfd, 5);
+
+    signal(SIGCHLD, reaper);
 
     while (1)
     {
@@ -85,11 +81,6 @@ int main()
             }
             close(sock);
             exit(0);
-
-        default:
-            signal(SIGCHLD, func);
-
-            //printf("My perent is %u, I is %u\n", getppid(), getpid());
         }
 
         close(sock);
