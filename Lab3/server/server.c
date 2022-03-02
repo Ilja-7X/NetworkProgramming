@@ -16,10 +16,7 @@
 
 void *handler(void *arg);
 
-struct server
-{
-    pthread_mutex_t st_mutex;
-} GLOBAL;
+pthread_mutex_t mutex;
 
 struct data
 {
@@ -28,6 +25,7 @@ struct data
 };
 
 int real_thread = 0;
+FILE *file;
 
 int main()
 {
@@ -59,9 +57,10 @@ int main()
 
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_mutex_init(&GLOBAL.st_mutex, 0);
+    pthread_mutex_init(&mutex, 0);
 
     len = sizeof(clientaddr);
+    file = fopen("file.txt", "w+");
 
     for (int i = 0; i < 3; i++)
     {
@@ -75,7 +74,6 @@ int main()
 
         arg[i] = (struct data *)malloc(sizeof(struct data));
         arg[i]->sock = sock;
-        //memcpy((void *)&arg[i]->clientaddr, &clientaddr, sizeof(clientaddr));
 
         if (pthread_create(&threads[i], &attr, (void *)handler, (void *)arg[i]) < 0)
         {
@@ -91,6 +89,8 @@ int main()
         pthread_join(threads[i], NULL);
     }
 
+    pthread_mutex_destroy(&mutex);
+
     //pthread_exit(NULL);
 
     printf("Memory is beging released\n");
@@ -99,7 +99,7 @@ int main()
     {
         free(arg[i]);
     }
-
+    fclose(file);
     close(listener);
     printf("Program is completed\n");
 
@@ -113,7 +113,6 @@ void *handler(void *arg)
 
     struct data *info = (struct data *)arg;
 
-    //printf("Hendler is begin\n");
     printf("info->sock = %d\n", info->sock);
 
     if ((num = recv(info->sock, &in, sizeof(in), 0) == -1))
@@ -121,7 +120,11 @@ void *handler(void *arg)
         perror("Recv");
         exit(0);
     }
-    //printf("Sock: %d, message: %d\n", info->sock, in);
+    pthread_mutex_lock(&mutex);
+    fprintf(file, "sock: %d, message: %d\n", info->sock, in);
+    pthread_mutex_unlock(&mutex);
+
+    printf("Sock: %d, message: %d\n", info->sock, in);
     //sleep(10);
     //printf("Hendler is end\n");
 
